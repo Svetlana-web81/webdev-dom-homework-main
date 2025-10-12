@@ -1,68 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Проект "Комменты"</title>
-  <meta charset="utf-8"/>
-  <link rel="stylesheet" href="styles.css"/>
+    <title>Проект "Комменты"</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="styles.css"/>
 </head>
 
 <body>
 <div class="container">
-  <ul class="comments">
-    <!-- Комментарии будут добавлены здесь -->
-  </ul>
-  <div class="add-form">
-    <input
-        type="text"
-        class="add-form-name"
-        placeholder="Введите ваше имя"
-    />
-    <textarea
-        type="textarea"
-        class="add-form-text"
-        placeholder="Введите ваш коментарий"
-        rows="4"
-    ></textarea>
-    <div class="add-form-row">
-      <button class="add-form-button">Написать</button>
+    <ul class="comments">
+        <!-- Комментарии будут добавлены здесь -->
+    </ul>
+    <div class="add-form">
+        <input
+                type="text"
+                class="add-form-name"
+                placeholder="Введите ваше имя"
+        />
+        <textarea
+                type="textarea"
+                class="add-form-text"
+                placeholder="Введите ваш коментарий"
+                rows="4"
+        ></textarea>
+        <div class="add-form-row">
+            <button class="add-form-button">Написать</button>
+        </div>
     </div>
-  </div>
 </div>
 </body>
 
 <script>
-  "use strict";
+    "use strict";
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const commentsList = document.querySelector(".comments");
-    const nameInput = document.querySelector(".add-form-name");
-    const commentInput = document.querySelector(".add-form-text");
-    const addButton = document.querySelector(".add-form-button");
+    document.addEventListener("DOMContentLoaded", function () {
+        const commentsList = document.querySelector(".comments");
+        const nameInput = document.querySelector(".add-form-name");
+        const commentInput = document.querySelector(".add-form-text");
+        const addButton = document.querySelector(".add-form-button");
 
-    // Исходный массив данных с комментариями
-    let comments = [
-      {
-        name: "Глеб Фокин",
-        date: "12.02.22 12:18",
-        text: "Это будет первый комментарий на этой странице",
-        likes: 3,
-        isLiked: false,
-      },
-      {
-        name: "Варвара Н.",
-        date: "13.02.22 19:22",
-        text: "Мне нравится как оформлена эта страница! ❤",
-        likes: 75,
-        isLiked: true,
-      },
-    ];
+        let comments = [
+            {
+                name: "Глеб Фокин",
+                date: "12.02.22 12:18",
+                text: "Это будет первый комментарий на этой странице",
+                likes: 3,
+                isLiked: false,
+            },
+            {
+                name: "Варвара Н.",
+                date: "13.02.22 19:22",
+                text: "Мне нравится как оформлена эта страница! ❤",
+                likes: 75,
+                isLiked: true,
+            },
+        ];
 
-    // Функция рендеринга списка комментариев
-    function renderComments() {
-      commentsList.innerHTML = comments
-          .map((comment, index) => {
-            return `
-              <li class="comment">
+        function renderComments() {
+            commentsList.innerHTML = comments
+                .map((comment, index) => {
+                    return `
+              <li class="comment" data-index="${index}">
                 <div class="comment-header">
                   <div>${comment.name}</div>
                   <div>${comment.date}</div>
@@ -80,52 +78,62 @@
                 </div>
               </li>
             `;
-          })
-          .join("");
+                })
+                .join("");
 
-      // Добавляем обработчики событий на кнопки лайков после рендеринга
-      document.querySelectorAll('.like-button').forEach(button => {
-        button.addEventListener('click', (event) => {
-          const index = event.target.dataset.index;
-          toggleLike(index);
+            document.querySelectorAll('.like-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const index = button.dataset.index;
+                    toggleLike(index);
+                });
+            });
+
+            document.querySelectorAll('.comment').forEach(commentElement => {
+                commentElement.addEventListener('click', (event) => {
+                    const index = commentElement.dataset.index;
+                    fillCommentForm(index);
+                });
+            });
+        }
+
+        function toggleLike(index) {
+            comments[index].isLiked = !comments[index].isLiked;
+            comments[index].likes += comments[index].isLiked ? 1 : -1;
+            renderComments();
+        }
+
+        function fillCommentForm(index) {
+            const comment = comments[index];
+            nameInput.value = comment.name;
+            commentInput.value = `> ${comment.text}\n`;
+        }
+
+        addButton.addEventListener("click", function () {
+            const name = nameInput.value.trim().replaceAll("<", "<").replaceAll(">", ">");
+            const commentText = commentInput.value.trim().replaceAll("<", "<").replaceAll(">", ">");
+
+            if (!name || !commentText) {
+                alert("Пожалуйста, заполните все поля.");
+                return;
+            }
+
+            const newComment = {
+                name: name,
+                date: new Date().toLocaleString(),
+                text: commentText,
+                likes: 0,
+                isLiked: false,
+            };
+
+            comments.push(newComment);
+            renderComments();
+            nameInput.value = "";
+            commentInput.value = "";
         });
-      });
-    }
-
-    // Функция для переключения лайка
-    function toggleLike(index) {
-      comments[index].isLiked = !comments[index].isLiked;
-      comments[index].likes += comments[index].isLiked ? 1 : -1;
-      renderComments(); // Перерисовываем список после изменения данных
-    }
-
-    // Обработчик добавления нового комментария
-    addButton.addEventListener("click", function () {
-      const name = nameInput.value.trim();
-      const comment = commentInput.value.trim();
-
-      if (!name || !comment) {
-        alert("Пожалуйста, заполните все поля.");
-        return;
-      }
-
-      const newComment = {
-        name: name,
-        date: new Date().toLocaleString(),
-        text: comment,
-        likes: 0,
-        isLiked: false,
-      };
-
-      comments.push(newComment); // Добавляем новый комментарий в массив
-      renderComments();
-      nameInput.value = "";
-      commentInput.value = "";
+        renderComments();
     });
-
-    // Первоначальная отрисовка комментариев
-    renderComments();
-  });
 
 </script>
 </html>
+
