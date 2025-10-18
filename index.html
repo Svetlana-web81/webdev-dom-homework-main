@@ -8,7 +8,7 @@
 
 <body>
   <div class="container">
-    <!-- Комментарии будут добавлены здесь -->
+    <!-- Список комментариев -->
     <ul class="comments"></ul>
 
     <!-- Форма для добавления комментария -->
@@ -19,7 +19,6 @@
         placeholder="Введите ваше имя"
       />
       <textarea
-        type="textarea"
         class="add-form-text"
         placeholder="Введите ваш комментарий"
         rows="4"
@@ -57,14 +56,15 @@
         },
       ];
 
-      // Функция экранирования HTML-символов
+      //  Правильное экранирование HTML
       function escapeHTML(text) {
+        if (typeof text !== 'string') return '';
         return text
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "<")
-          .replaceAll(">", ">")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#x27;");
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "<")
+          .replace(/>/g, ">")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
       }
 
       // Функция рендера всех комментариев
@@ -72,12 +72,10 @@
         commentsList.innerHTML = "";
 
         comments.forEach((comment, index) => {
-          // Экранируем данные перед вставкой
           const safeName = escapeHTML(comment.name);
           const safeText = escapeHTML(comment.text);
           const safeDate = escapeHTML(comment.date);
 
-          // Создаём элемент комментария
           const li = document.createElement("li");
           li.classList.add("comment");
           li.dataset.index = index;
@@ -93,23 +91,23 @@
             <div class="comment-footer">
               <div class="likes">
                 <span class="likes-counter">${comment.likes}</span>
-                <button class="like-button ${comment.isLiked ? "-active-like" : ""}" data-index="${index}"></button>
+                <button class="like-button ${
+                  comment.isLiked ? "-active-like" : ""
+                }" data-index="${index}"></button>
               </div>
             </div>
           `;
 
-          // Обработчик клика на кнопку лайка
+          // Лайк
           const likeButton = li.querySelector(".like-button");
           likeButton.addEventListener("click", (event) => {
-            event.stopPropagation(); // Останавливаем всплытие → не сработает ответ
+            event.stopPropagation();
             toggleLike(index);
           });
 
-          // Обработчик клика по карточке комментария — для ответа
+          // Клик по комментарию — подставляем только текст (без > и без safeText!)
           li.addEventListener("click", () => {
-            // При клике подставляем имя автора и цитату
-            nameInput.value = comment.name; // ← Вот это было пропущено! Теперь имя подставляется
-            commentInput.value += `> ${comment.name}: ${comment.text}\n`;
+            commentInput.value = `${comment.text}\n\n`; // Только оригинал
             commentInput.focus();
           });
 
@@ -117,11 +115,11 @@
         });
       }
 
-      // Переключение состояния лайка
+      // Переключение лайка
       function toggleLike(index) {
         comments[index].isLiked = !comments[index].isLiked;
         comments[index].likes += comments[index].isLiked ? 1 : -1;
-        renderComments(); // Перерисовываем всё
+        renderComments(); // Можно оптимизировать, но пока оставим так
       }
 
       // Отправка нового комментария
@@ -129,18 +127,34 @@
         let name = nameInput.value.trim();
         let text = commentInput.value.trim();
 
-        if (!name || !text) {
-          alert("Пожалуйста, заполните все поля.");
+        if (!name) {
+          alert("Пожалуйста, введите ваше имя.");
+          nameInput.focus();
+          return;
+        }
+        if (!text) {
+          alert("Пожалуйста, введите ваш комментарий.");
+          commentInput.focus();
           return;
         }
 
-        // Экранируем ввод пользователя
+        // Экранируем перед сохранением
         name = escapeHTML(name);
         text = escapeHTML(text);
 
+        // Формат даты
+        const now = new Date();
+        const date = now.toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
+
         const newComment = {
           name: name,
-          date: new Date().toLocaleString(),
+          date: date,
           text: text,
           likes: 0,
           isLiked: false,
@@ -149,9 +163,10 @@
         comments.push(newComment);
         renderComments();
 
-        // После отправки очищаем только имя
+        // Очистка
         nameInput.value = "";
-        // Можно оставить комментарий — чтобы можно было писать несколько ответов подряд
+        commentInput.value = "";
+        nameInput.focus();
       });
 
       // Первичная отрисовка
@@ -160,4 +175,3 @@
   </script>
 </body>
 </html>
-
