@@ -1,131 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="utf-8" />
   <title>Проект "Комменты"</title>
-  <meta charset="utf-8"/>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-<div class="container">
-  <ul class="comments">
-    <!-- Комментарии будут добавлены здесь -->
-  </ul>
-  <div class="add-form">
-    <input
+  <div class="container">
+    <!-- Список комментариев -->
+    <ul class="comments"></ul>
+
+    <!-- Форма для добавления комментария -->
+    <div class="add-form">
+      <input
         type="text"
         class="add-form-name"
         placeholder="Введите ваше имя"
-    />
-    <textarea
-        type="textarea"
+      />
+      <textarea
         class="add-form-text"
-        placeholder="Введите ваш коментарий"
+        placeholder="Введите ваш комментарий"
         rows="4"
-    ></textarea>
-    <div class="add-form-row">
-      <button class="add-form-button">Написать</button>
+      ></textarea>
+      <div class="add-form-row">
+        <button class="add-form-button">Написать</button>
+      </div>
     </div>
   </div>
-</div>
-</body>
 
-<script>
-  "use strict";
+  <script>
+    "use strict";
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const commentsList = document.querySelector(".comments");
-    const nameInput = document.querySelector(".add-form-name");
-    const commentInput = document.querySelector(".add-form-text");
-    const addButton = document.querySelector(".add-form-button");
+    document.addEventListener("DOMContentLoaded", function () {
+      const commentsList = document.querySelector(".comments");
+      const nameInput = document.querySelector(".add-form-name");
+      const commentInput = document.querySelector(".add-form-text");
+      const addButton = document.querySelector(".add-form-button");
 
-    // Исходный массив данных с комментариями
-    let comments = [
-      {
-        name: "Глеб Фокин",
-        date: "12.02.22 12:18",
-        text: "Это будет первый комментарий на этой странице",
-        likes: 3,
-        isLiked: false,
-      },
-      {
-        name: "Варвара Н.",
-        date: "13.02.22 19:22",
-        text: "Мне нравится как оформлена эта страница! ❤",
-        likes: 75,
-        isLiked: true,
-      },
-    ];
+      // Массив данных с комментариями
+      let comments = [
+        {
+          name: "Глеб Фокин",
+          date: "12.02.22 12:18",
+          text: "Это будет первый комментарий на этой странице",
+          likes: 3,
+          isLiked: false,
+        },
+        {
+          name: "Варвара Н.",
+          date: "13.02.22 19:22",
+          text: "Мне нравится как оформлена эта страница! ❤",
+          likes: 75,
+          isLiked: true,
+        },
+      ];
 
-    // Функция рендеринга списка комментариев
-    function renderComments() {
-      commentsList.innerHTML = comments
-          .map((comment, index) => {
-            return `
-              <li class="comment">
-                <div class="comment-header">
-                  <div>${comment.name}</div>
-                  <div>${comment.date}</div>
-                </div>
-                <div class="comment-body">
-                  <div class="comment-text">
-                    ${comment.text}
-                  </div>
-                </div>
-                <div class="comment-footer">
-                  <div class="likes">
-                    <span class="likes-counter">${comment.likes}</span>
-                    <button class="like-button ${comment.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
-                  </div>
-                </div>
-              </li>
-            `;
-          })
-          .join("");
+      // ✅ Правильное экранирование HTML-символов через HTML-сущности
+     function escapeHTML(text) {
+     if (typeof text !== 'string') return '';
+     return text
+    .replace(/&/g, "&amp;")   // & → &amp;
+    .replace(/</g, "&lt;")     // < → &lt;
+    .replace(/>/g, "&gt;")     // > → &gt;
+    .replace(/"/g, "&quot;")  // " → &quot;
+    .replace(/'/g, "&#039;"); // ' → &#039;
+}
 
-      // Добавляем обработчики событий на кнопки лайков после рендеринга
-      document.querySelectorAll('.like-button').forEach(button => {
-        button.addEventListener('click', (event) => {
-          const index = event.target.dataset.index;
-          toggleLike(index);
+      // Функция рендера всех комментариев
+      function renderComments() {
+        commentsList.innerHTML = "";
+
+        comments.forEach((comment, index) => {
+          // Экранируем данные перед вставкой в DOM
+          const safeName = escapeHTML(comment.name);
+          const safeText = escapeHTML(comment.text);
+          const safeDate = escapeHTML(comment.date);
+
+          // Создаём элемент комментария
+          const li = document.createElement("li");
+          li.classList.add("comment");
+          li.dataset.index = index;
+
+          li.innerHTML = `
+            <div class="comment-header">
+              <div>${safeName}</div>
+              <div>${safeDate}</div>
+            </div>
+            <div class="comment-body">
+              <div class="comment-text">${safeText}</div>
+            </div>
+            <div class="comment-footer">
+              <div class="likes">
+                <span class="likes-counter">${comment.likes}</span>
+                <button class="like-button ${
+                  comment.isLiked ? "-active-like" : ""
+                }" data-index="${index}"></button>
+              </div>
+            </div>
+          `;
+
+          // Обработчик лайка
+          const likeButton = li.querySelector(".like-button");
+          likeButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            toggleLike(index);
+          });
+
+          // Обработчик клика по комментарию — подставляем ТОЛЬКО текст
+          li.addEventListener("click", () => {
+            // Подставляем оригинальный текст комментария (без >, без имени)
+            commentInput.value = `${comment.text}\n\n`;
+            commentInput.focus();
+          });
+
+          commentsList.appendChild(li);
         });
-      });
-    }
-
-    // Функция для переключения лайка
-    function toggleLike(index) {
-      comments[index].isLiked = !comments[index].isLiked;
-      comments[index].likes += comments[index].isLiked ? 1 : -1;
-      renderComments(); // Перерисовываем список после изменения данных
-    }
-
-    // Обработчик добавления нового комментария
-    addButton.addEventListener("click", function () {
-      const name = nameInput.value.trim();
-      const comment = commentInput.value.trim();
-
-      if (!name || !comment) {
-        alert("Пожалуйста, заполните все поля.");
-        return;
       }
 
-      const newComment = {
-        name: name,
-        date: new Date().toLocaleString(),
-        text: comment,
-        likes: 0,
-        isLiked: false,
-      };
+      // Переключение состояния лайка
+      function toggleLike(index) {
+        comments[index].isLiked = !comments[index].isLiked;
+        comments[index].likes += comments[index].isLiked ? 1 : -1;
+        renderComments(); // Перерисовываем (можно оптимизировать позже)
+      }
 
-      comments.push(newComment); // Добавляем новый комментарий в массив
+      // Отправка нового комментария
+      addButton.addEventListener("click", () => {
+        const name = nameInput.value.trim();
+        const text = commentInput.value.trim();
+
+        if (!name) {
+          alert("Пожалуйста, введите ваше имя.");
+          nameInput.focus();
+          return;
+        }
+        if (!text) {
+          alert("Пожалуйста, введите ваш комментарий.");
+          commentInput.focus();
+          return;
+        }
+
+        // Экранируем ввод пользователя ДО сохранения
+        const escapedName = escapeHTML(name);
+        const escapedText = escapeHTML(text);
+
+        // Формируем дату: ДД.ММ.ГГ ЧЧ:ММ
+        const now = new Date();
+        const date = now.toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
+
+        // Создаём новый комментарий
+        const newComment = {
+          name: escapedName,
+          date: date,
+          text: escapedText,
+          likes: 0,
+          isLiked: false,
+        };
+
+        comments.push(newComment);     // Добавляем в массив
+        renderComments();              // Обновляем отображение
+
+        // Очищаем форму
+        nameInput.value = "";
+        commentInput.value = "";
+        nameInput.focus();
+      });
+
+      // Первичная отрисовка
       renderComments();
-      nameInput.value = "";
-      commentInput.value = "";
     });
-
-    // Первоначальная отрисовка комментариев
-    renderComments();
-  });
-
-</script>
+  </script>
+</body>
 </html>
