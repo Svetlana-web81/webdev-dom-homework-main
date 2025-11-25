@@ -1,19 +1,19 @@
 {
   "name": "webdev-dom-homework-main",
   "version": "1.0.0",
-  "description": "https://glebkaf.github.io/webdev-dom-homework/",
+  "description": "Проект ленты комментариев с подключением к API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Svetlana-web81/webdev-dom-homework-main.git"
+    "url": "https://github.com/Svetlana-web81/webdev-dom-homework-main.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/Svetlana-web81/webdev-dom-homework-main/issues"
   },
