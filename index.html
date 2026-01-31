@@ -1,33 +1,36 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <title>Проект "Комменты"</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+<!doctype html>
+<html>
+    <head>
+        <title>Проект "Комменты"</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
 
-<body>
-  <div class="container">
-    <!-- Список комментариев -->
-    <ul class="comments"></ul>
+    <body>
+        <div class="container">
+            <ul class="comments"></ul>
 
-    <!-- Форма для добавления комментария -->
-    <div class="add-form">
-      <input
-        type="text"
-        class="add-form-name"
-        placeholder="Введите ваше имя"
-      />
-      <textarea
-        class="add-form-text"
-        placeholder="Введите ваш комментарий"
-        rows="4"
-      ></textarea>
-      <div class="add-form-row">
-        <button class="add-form-button">Написать</button>
-      </div>
-    </div>
-  </div>
-<script type="module" src="js/main.js"></script>
-</body>
+            <!-- Форма отправки комментария -->
+            <div class="add-form">
+                <input
+                    type="text"
+                    class="add-form-name"
+                    placeholder="Введите ваше имя"
+                    id="name-input"
+                />
+                <textarea
+                    type="textarea"
+                    class="add-form-text"
+                    placeholder="Введите ваш коментарий"
+                    rows="4"
+                    id="text-input"
+                ></textarea>
+                <div class="add-form-row">
+                    <button class="add-form-button">Написать</button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="./index.js"></script>
+    </body>
 </html>

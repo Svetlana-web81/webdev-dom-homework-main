@@ -1,3 +1,4 @@
+// renderer.js — отрисовка комментариев
 import { escapeHTML } from './validators.js';
 
 export function renderComments(comments) {
@@ -26,7 +27,7 @@ export function renderComments(comments) {
       <div class="comment-footer">
         <div class="likes">
           <span class="likes-counter">${comment.likes}</span>
-          <button class="like-button ${comment.isLiked ? "-active-like" : ""}" data-index="${index}"></button>
+          <button class="like-button ${comment.isLiked ? "-active-like" : ""}" data-index="${index}">👍</button>
         </div>
       </div>
     `;
@@ -34,3 +35,4 @@ export function renderComments(comments) {
     commentsList.appendChild(li);
   });
 }
+

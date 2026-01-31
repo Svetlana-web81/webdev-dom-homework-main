@@ -1,18 +1,15 @@
-export function initEventListeners(comments, renderComments) {
+// events.js — обработка событий
+import { postComment } from './api.js';
+import { renderComments } from './renderer.js';
+
+let comments = [];
+
+export function initEventListeners() {
   const nameInput = document.querySelector(".add-form-name");
   const commentInput = document.querySelector(".add-form-text");
   const addButton = document.querySelector(".add-form-button");
 
-  // Переключение лайка
-  function toggleLike(index) {
-    const comment = comments[index];
-    comment.isLiked = !comment.isLiked;
-    comment.likes += comment.isLiked ? 1 : -1;
-    renderComments(comments);
-  }
-
-  // Добавление нового комментария
-  function addComment() {
+  window.addComment = async function () {
     const name = nameInput.value.trim();
     const text = commentInput.value.trim();
 
@@ -27,8 +24,7 @@ export function initEventListeners(comments, renderComments) {
       return;
     }
 
-    const now = new Date();
-    const date = now.toLocaleString('ru-RU', {
+    const now = new Date().toLocaleString('ru-RU', {
       day: '2-digit',
       month: '2-digit',
       year: '2-digit',
@@ -36,21 +32,35 @@ export function initEventListeners(comments, renderComments) {
       minute: '2-digit'
     }).replace(',', '');
 
-    comments.push({
+    const newComment = {
       name: name,
       text: text,
-      date: date,
+      date: now,
       likes: 0,
       isLiked: false,
-    });
+    };
 
+    try {
+      const savedComment = await postComment(newComment);
+      comments.push(savedComment);
+      renderComments(comments);
+
+      nameInput.value = "";
+      commentInput.value = "";
+      nameInput.focus();
+    } catch (error) {
+      console.error("Ошибка при добавлении:", error);
+      alert("Не удалось отправить комментарий.");
+    }
+  };
+
+  window.toggleLike = function (index) {
+    const comment = comments[index];
+    comment.isLiked = !comment.isLiked;
+    comment.likes += comment.isLiked ? 1 : -1;
     renderComments(comments);
-    nameInput.value = "";
-    commentInput.value = "";
-    nameInput.focus();
-  }
+  };
 
-  // Обработчик клика по комментарию
   document.querySelector(".comments").addEventListener("click", (e) => {
     const commentEl = e.target.closest(".comment");
     if (!commentEl) return;
@@ -60,7 +70,6 @@ export function initEventListeners(comments, renderComments) {
     commentInput.focus();
   });
 
-  // Обработчик лайка
   document.querySelector(".comments").addEventListener("click", (e) => {
     if (e.target.classList.contains("like-button")) {
       e.stopPropagation();
@@ -69,6 +78,10 @@ export function initEventListeners(comments, renderComments) {
     }
   });
 
-  // Кнопка отправки
   addButton.addEventListener("click", addComment);
 }
+
+export function setCommentsState(newComments) {
+  comments = newComments;
+}
+
